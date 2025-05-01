@@ -21,7 +21,7 @@ class BatteryIndicator:
         self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 
         self.menu = Gtk.Menu()
-        self.battery_item = Gtk.MenuItem(label="Bateria: ...%")
+        self.battery_item = Gtk.MenuItem(label="Bateria do fone: ...%")
         self.battery_item.set_sensitive(False)
 
         self.menu.append(self.battery_item)
@@ -51,7 +51,7 @@ class BatteryIndicator:
             battery = get_battery_level()
             GLib.idle_add(
                 self.battery_item.set_label,
-                f"Bateria: {battery}%"
+                f"Bateria do fone: {battery}%"
             )
             time.sleep(30)
 
