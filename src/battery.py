@@ -7,13 +7,18 @@ def get_battery_level() -> int:
 
     :returns battery_life: Nível da bateria (porcentagem)
     """
-    bus = SystemBus()
-    manager = bus.get('org.bluez', '/')
-    devices = manager.GetManagedObjects()
+    try:
+        bus = SystemBus()
+        manager = bus.get('org.bluez', '/')
+        devices = manager.GetManagedObjects()
 
-    device = '/org/bluez/hci0/dev_40_35_E6_16_8F_11'
-    battery = 'org.bluez.Battery1'
+        device = '/org/bluez/hci0/dev_40_35_E6_16_8F_11'
+        battery = 'org.bluez.Battery1'
 
-    battery_life = devices[device][battery]['Percentage']
+        battery_life = devices[device][battery]['Percentage']
 
-    return battery_life
+        return battery_life
+
+    except Exception as e:
+        print(f'Dispositivo não encontrado {e}')
+        return False

@@ -49,11 +49,19 @@ class BatteryIndicator:
         """
         while self.running:
             battery = get_battery_level()
-            GLib.idle_add(
-                self.battery_item.set_label,
-                f"Bateria do fone: {battery}%"
-            )
-            time.sleep(30)
+
+            if battery:
+                GLib.idle_add(
+                    self.battery_item.set_label,
+                    f"Bateria do fone: {battery}%"
+                )
+            else:
+                GLib.idle_add(
+                    self.battery_item.set_label,
+                    "Fone não encontrado"
+                )
+
+            time.sleep(5)
 
     def quit(self, _) -> None:
         self.running = False
