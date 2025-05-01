@@ -45,15 +45,15 @@ class BatteryIndicator:
     def update_battery_loop(self) -> None:
         """
         Faz o update da interface gráfica para atualizar o nível
-        da bateria a cada 30 segundos
+        da bateria a cada 5 segundos
         """
         while self.running:
-            battery = get_battery_level()
+            device = get_battery_level()
 
-            if battery:
+            if device:
                 GLib.idle_add(
                     self.battery_item.set_label,
-                    f"Bateria do fone: {battery}%"
+                    f"{device['device_name']}: {device['battery_life']}%"
                 )
             else:
                 GLib.idle_add(
