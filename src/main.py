@@ -42,7 +42,11 @@ class BatteryIndicator:
         )
         self.update_thread.start()
 
-    def update_battery_loop(self):
+    def update_battery_loop(self) -> None:
+        """
+        Faz o update da interface gráfica para atualizar o nível
+        da bateria a cada 30 segundos
+        """
         while self.running:
             battery = get_battery_level()
             GLib.idle_add(
@@ -51,7 +55,7 @@ class BatteryIndicator:
             )
             time.sleep(30)
 
-    def quit(self, _):
+    def quit(self, _) -> None:
         self.running = False
         Gtk.main_quit()
 

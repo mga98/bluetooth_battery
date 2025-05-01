@@ -1,7 +1,12 @@
 from pydbus import SystemBus
 
 
-def get_battery_level():
+def get_battery_level() -> int:
+    """
+    Retorna a bateria do dispositivo bluetooth conectado
+
+    :returns battery_life: Nível da bateria (porcentagem)
+    """
     bus = SystemBus()
     manager = bus.get('org.bluez', '/')
     devices = manager.GetManagedObjects()
