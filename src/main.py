@@ -55,6 +55,10 @@ class BatteryIndicator:
                     self.battery_item.set_label,
                     f"{device['device_name']}: {device['battery_life']}%"
                 )
+                GLib.idle_add(
+                    self.indicator.set_label,
+                    f"{device['battery_life']}%", ''
+                )
             else:
                 GLib.idle_add(
                     self.battery_item.set_label,
@@ -69,7 +73,6 @@ class BatteryIndicator:
 
 
 def main():
-    # permite Ctrl+C no terminal
     signal.signal(signal.SIGINT, signal.SIG_DFL)
     BatteryIndicator()
     Gtk.main()
