@@ -1,5 +1,6 @@
 import os
 import gi
+import sys
 import time
 import signal
 import threading
@@ -11,14 +12,22 @@ gi.require_version('AppIndicator3', '0.1')
 
 from gi.repository import AppIndicator3, Gtk, GLib  # noqa
 
-currpath = os.path.dirname(os.path.realpath(__file__))
+
+def get_resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+
+    return os.path.join(os.path.abspath("."), relative_path)
+
+
+icone_path = get_resource_path("src/icons/white_headphone.png")
 
 
 class BatteryIndicator:
     def __init__(self):
         self.indicator = AppIndicator3.Indicator.new(
             'bt_battery',
-            currpath + '/icons/white_headphone.png',
+            icone_path,
             AppIndicator3.IndicatorCategory.APPLICATION_STATUS
         )
         self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
