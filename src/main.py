@@ -64,6 +64,7 @@ class BatteryIndicator:
                         self.indicator.set_label,
                         f'{device['battery_life']}%', ''
                     )
+
                 else:
                     GLib.idle_add(
                         self.indicator.set_icon,

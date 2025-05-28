@@ -21,7 +21,8 @@ def get_battery_level() -> dict:
                         battery = value.get('org.bluez.Battery1')
                         device_info['battery_life'] = battery['Percentage']
                         device_info['device_name'] = v['Name']
-                        device_info['icon'] = v['Icon']
+                        device_info['icon'] = f'{v['Icon']}-symbolic'
+
                         break
 
         return device_info
