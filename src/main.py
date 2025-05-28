@@ -64,6 +64,10 @@ class BatteryIndicator:
 
             if device:
                 GLib.idle_add(
+                    self.indicator.set_icon,
+                    device['icon']
+                )
+                GLib.idle_add(
                     self.battery_item.set_label,
                     f'{device['device_name']}: {device['battery_life']}%'
                 )

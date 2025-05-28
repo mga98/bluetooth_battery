@@ -12,17 +12,17 @@ def get_battery_level() -> dict:
         manager = bus.get('org.bluez', '/')
         devices = manager.GetManagedObjects()
 
-        device = '/org/bluez/hci0/dev_40_35_E6_16_8F_11'
-        battery = 'org.bluez.Battery1'
-        name = 'org.bluez.Device1'
+        device_info = {}
 
-        battery_life = devices[device][battery]['Percentage']
-        device_name = devices[device][name]['Name']
-
-        device_info = {
-            'battery_life': battery_life,
-            'device_name': device_name
-        }
+        for value in devices.values():
+            if value.get('org.bluez.Battery1'):
+                for v in value.values():
+                    if v.get('Name'):
+                        battery = value.get('org.bluez.Battery1')
+                        device_info['battery_life'] = battery['Percentage']
+                        device_info['device_name'] = v['Name']
+                        device_info['icon'] = v['Icon']
+                        break
 
         return device_info
 
