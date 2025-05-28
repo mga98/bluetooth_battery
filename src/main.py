@@ -47,37 +47,42 @@ class BatteryIndicator:
         Faz o update da interface gráfica para atualizar o nível
         da bateria a cada 5 segundos
         '''
-        while self.running:
-            device = get_battery_level()
+        try:
+            while self.running:
+                device = get_battery_level()
 
-            if device:
-                GLib.idle_add(
-                    self.indicator.set_icon,
-                    device['icon']
-                )
-                GLib.idle_add(
-                    self.battery_item.set_label,
-                    f'{device['device_name']}: {device['battery_life']}%'
-                )
-                GLib.idle_add(
-                    self.indicator.set_label,
-                    f'{device['battery_life']}%', ''
-                )
-            else:
-                GLib.idle_add(
-                    self.indicator.set_icon,
-                    ''
-                )
-                GLib.idle_add(
-                    self.battery_item.set_label,
-                    'Dispositivo não encontrado'
-                )
-                GLib.idle_add(
-                    self.indicator.set_label,
-                    '', ''
-                )
+                if device:
+                    GLib.idle_add(
+                        self.indicator.set_icon,
+                        device['icon']
+                    )
+                    GLib.idle_add(
+                        self.battery_item.set_label,
+                        f'{device['device_name']}: {device['battery_life']}%'
+                    )
+                    GLib.idle_add(
+                        self.indicator.set_label,
+                        f'{device['battery_life']}%', ''
+                    )
+                else:
+                    GLib.idle_add(
+                        self.indicator.set_icon,
+                        ''
+                    )
+                    GLib.idle_add(
+                        self.battery_item.set_label,
+                        'Dispositivo não encontrado'
+                    )
+                    GLib.idle_add(
+                        self.indicator.set_label,
+                        '', ''
+                    )
 
-            time.sleep(5)
+                time.sleep(5)
+
+        except Exception as e:
+            print(f'Erro ao carregar informações do dispositivo: {e}')
+            self.quit()
 
     def quit(self, _) -> None:
         self.running = False
