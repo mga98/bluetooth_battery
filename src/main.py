@@ -1,6 +1,4 @@
-import os
 import gi
-import sys
 import time
 import signal
 import threading
@@ -13,27 +11,17 @@ gi.require_version('AppIndicator3', '0.1')
 from gi.repository import AppIndicator3, Gtk, GLib  # noqa
 
 
-def get_resource_path(relative_path):
-    if hasattr(sys, '_MEIPASS'):
-        return os.path.join(sys._MEIPASS, relative_path)
-
-    return os.path.join(os.path.abspath("."), relative_path)
-
-
-icone_path = get_resource_path("src/icons/white_headphone.png")
-
-
 class BatteryIndicator:
     def __init__(self):
         self.indicator = AppIndicator3.Indicator.new(
             'bt_battery',
-            icone_path,
+            '',
             AppIndicator3.IndicatorCategory.APPLICATION_STATUS
         )
         self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 
         self.menu = Gtk.Menu()
-        self.battery_item = Gtk.MenuItem(label='Bateria do fone: ...%')
+        self.battery_item = Gtk.MenuItem(label='Bateria do dispositivo: ...%')
         self.battery_item.set_sensitive(False)
 
         self.menu.append(self.battery_item)
@@ -77,8 +65,12 @@ class BatteryIndicator:
                 )
             else:
                 GLib.idle_add(
+                    self.indicator.set_icon,
+                    ''
+                )
+                GLib.idle_add(
                     self.battery_item.set_label,
-                    'Fone não encontrado'
+                    'Dispositivo não encontrado'
                 )
                 GLib.idle_add(
                     self.indicator.set_label,
