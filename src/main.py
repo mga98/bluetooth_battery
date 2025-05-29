@@ -45,7 +45,10 @@ class BatteryIndicator:
     def update_pairable_devices(self) -> int:
         """
         Atualiza a lista de dispositivos disponíveis para conexão
-        e retorna a quantidade de dispositivos a serem atualizados
+        e retorna a quantidade de dispositivos que foram atualizados
+
+        :returns devices_to_update: Quantidade de dispositivos que foram
+            atualizados em self.paraible_devices
         """
         devices_to_update = 0
         for device in list_devices():

@@ -4,6 +4,9 @@ from pydbus import SystemBus
 def get_all_devices() -> dict:
     """
     Retorna as informações de todos os dipositivos blueetooth disponíveis
+
+    :returns devices: Dicionário com informações dos dispositivos bluetooth
+        disponiveis
     """
     try:
         bus = SystemBus()
@@ -16,9 +19,12 @@ def get_all_devices() -> dict:
         return {'Error': f'Erro ao encontrar dispositivos: {e}'}
 
 
-def list_devices():
+def list_devices() -> list:
     """
     Lista todos os dispositivos bluetooth disponíveis
+
+    :returns devices_list: Lista com todos os dispositivos
+        disponiveis
     """
     try:
         devices = get_all_devices()
