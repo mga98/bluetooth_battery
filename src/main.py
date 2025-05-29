@@ -3,7 +3,7 @@ import time
 import signal
 import threading
 
-from battery import get_battery_level
+from battery import get_battery_level, list_devices
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('AppIndicator3', '0.1')
@@ -21,17 +21,17 @@ class BatteryIndicator:
         self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 
         self.menu = Gtk.Menu()
-        self.battery_item = Gtk.MenuItem(label='Bateria do dispositivo: ...%')
-        self.battery_item.set_sensitive(False)
+        self.pairable_devices = list()
 
+        self.battery_item = Gtk.MenuItem(label='Bateria do dispositivo: ...%')
         self.menu.append(self.battery_item)
 
         self.menu.append(Gtk.SeparatorMenuItem())
         quit_item = Gtk.MenuItem(label='Sair')
         quit_item.connect('activate', self.quit)
         self.menu.append(quit_item)
-
         self.menu.show_all()
+
         self.indicator.set_menu(self.menu)
 
         # Thread para atualizar a bateria
@@ -42,6 +42,37 @@ class BatteryIndicator:
         )
         self.update_thread.start()
 
+    def update_pairable_devices(self) -> int:
+        """
+        Atualiza a lista de dispositivos disponíveis para conexão
+        e retorna a quantidade de dispositivos a serem atualizados
+        """
+        devices_to_update = 0
+        for device in list_devices():
+            if device not in self.pairable_devices:
+                self.pairable_devices.append(device)
+                devices_to_update += 1
+
+        return devices_to_update
+
+    def update_devices_menu(self) -> None:
+        """
+        Atualiza o menu de dispositivos disponíveis para conexão caso
+        haja algum novo dispositivo disponível
+        """
+        for device in self.pairable_devices:
+            device_item = Gtk.MenuItem(label=device)
+            device_item.set_sensitive(False)
+            menu_labels = [label.get_label() for label in self.menu]
+
+            # Só adiciona se o dispositivo ainda não estiver no menu
+            if device_item.get_label() not in menu_labels:
+                # Insere os itens na posição [1] da lista para garantir
+                # que o botão de sair apareça no fim
+                self.menu.insert(device_item, 1)
+
+            self.menu.show_all()
+
     def update_battery_loop(self) -> None:
         '''
         Faz o update da interface gráfica para atualizar o nível
@@ -50,6 +81,12 @@ class BatteryIndicator:
         try:
             while self.running:
                 device = get_battery_level()
+                devices_to_update = self.update_pairable_devices()
+
+                # Só atualiza o menu se devices_to_update for maior do
+                # que 0 (evitando updates desnecessários)
+                if devices_to_update > 0:
+                    GLib.idle_add(self.update_devices_menu)
 
                 if device:
                     GLib.idle_add(

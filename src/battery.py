@@ -1,6 +1,40 @@
 from pydbus import SystemBus
 
 
+def get_all_devices() -> dict:
+    """
+    Retorna as informações de todos os dipositivos blueetooth disponíveis
+    """
+    try:
+        bus = SystemBus()
+        manager = bus.get('org.bluez', '/')
+        devices = manager.GetManagedObjects()
+
+        return devices
+
+    except Exception as e:
+        return {'Error': f'Erro ao encontrar dispositivos: {e}'}
+
+
+def list_devices():
+    """
+    Lista todos os dispositivos bluetooth disponíveis
+    """
+    try:
+        devices = get_all_devices()
+        devices_list = []
+
+        for value in devices.values():
+            for v in value.values():
+                if v.get('Name') and v.get('Pairable') is not False:
+                    devices_list.append(v['Name'])
+
+        return devices_list
+
+    except Exception as e:
+        return {'Error': f'Erro ao listar dispositivos: {e}'}
+
+
 def get_battery_level() -> dict:
     """
     Retorna informações do dispositivo bluetooth conectado
@@ -8,10 +42,7 @@ def get_battery_level() -> dict:
     :returns device_info: Dicionário com informações do dispositivo
     """
     try:
-        bus = SystemBus()
-        manager = bus.get('org.bluez', '/')
-        devices = manager.GetManagedObjects()
-
+        devices = get_all_devices()
         device_info = {}
 
         for value in devices.values():
@@ -33,5 +64,12 @@ def get_battery_level() -> dict:
 
 
 if __name__ == '__main__':
-    battery = get_battery_level()
-    print(battery)
+    # battery = get_battery_level()
+    # print(battery)
+
+    # import json  # noqa
+    # devices = get_all_devices()
+    # print(json.dumps(devices, indent=2))
+
+    devices_list = list_devices()
+    print(devices_list)
