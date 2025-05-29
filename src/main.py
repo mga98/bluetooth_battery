@@ -112,7 +112,7 @@ class BatteryIndicator:
                     )
                     GLib.idle_add(
                         self.battery_item.set_label,
-                        'Dispositivo não encontrado'
+                        'Nenhum dispositivo conectado'
                     )
                     GLib.idle_add(
                         self.indicator.set_label,
