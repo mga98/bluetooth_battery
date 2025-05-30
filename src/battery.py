@@ -49,18 +49,24 @@ def get_battery_level() -> dict:
     """
     try:
         devices = get_all_devices()
-        device_info = {}
+        device_info = []
 
         for value in devices.values():
-            if value.get('org.bluez.Battery1'):
-                for v in value.values():
-                    if v.get('Name'):
-                        battery = value.get('org.bluez.Battery1')
-                        device_info['battery_life'] = battery['Percentage']
-                        device_info['device_name'] = v['Name']
-                        device_info['icon'] = f'{v['Icon']}-symbolic'
+            for v in value.values():
+                if v.get('Name') and v.get('Paired') is True:
+                    try:
+                        battery_life = value.get(
+                            'org.bluez.Battery1'
+                        )['Percentage']
+                    except Exception:
+                        battery_life = None
 
-                        break
+                    device_info.append({
+                        'battery_life': battery_life,
+                        'device_name': v['Name'],
+                        'connected': v['Connected'],
+                        'icon': f'{v['Icon']}-symbolic'
+                    })
 
         return device_info
 
@@ -70,12 +76,12 @@ def get_battery_level() -> dict:
 
 
 if __name__ == '__main__':
-    # battery = get_battery_level()
-    # print(battery)
+    import json  # noqa
+    battery = get_battery_level()
+    print(json.dumps(battery, indent=2))
 
-    # import json  # noqa
     # devices = get_all_devices()
     # print(json.dumps(devices, indent=2))
 
-    devices_list = list_devices()
-    print(devices_list)
+    # devices_list = list_devices()
+    # print(devices_list)
