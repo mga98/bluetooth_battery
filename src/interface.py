@@ -41,9 +41,16 @@ class BatteryIndicator:
         self.update_thread.start()
 
     def format_device_label(self, name, battery):
+        """
+        Formata o rótulo do dispositivo com o nome e o nível de bateria
+        """
         return f"{name}: {battery}%" if battery else name
 
     def update_devices_menu(self) -> None:
+        """
+        Atualiza o menu com os dispositivos conectados e seus níveis de bateria
+        """
+        # Obtém a lista de dispositivos conectados e seus níveis de bateria
         devices_list = get_battery_level()
         devices_list.sort(key=lambda d: d['device_name'].lower())
 
