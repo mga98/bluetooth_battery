@@ -24,21 +24,15 @@ class BatteryIndicator:
         self.indicator.set_status(AppIndicator3.IndicatorStatus.ACTIVE)
 
         self.menu = Gtk.Menu()
-        self.devices_state = dict()
+        self.devices_state = {}
+        self.menu_items = {}
 
-        # Botão de sair
         quit_item = Gtk.MenuItem(label='Sair')
         quit_item.connect('activate', self.quit)
-        self.menu.append(Gtk.SeparatorMenuItem())
-        self.menu.append(quit_item)
+        self.quit_item = quit_item
 
-        self.menu.show_all()
         self.indicator.set_menu(self.menu)
 
-        # Ícone do sistema (removido vazio)
-        # self.indicator.set_icon('')  # Defina um ícone se quiser
-
-        # Thread de atualização
         self.running = True
         self.update_thread = threading.Thread(
             target=self.update_battery_loop,
@@ -46,71 +40,76 @@ class BatteryIndicator:
         )
         self.update_thread.start()
 
-    def clear_menu(self) -> None:
-        """
-        Remove os itens de dispositivos do menu (mantém apenas o botão 'Sair')
-        """
-        for item in self.menu.get_children():
-            if item.get_label() and item.get_label() != 'Sair':
-                self.menu.remove(item)
-
-    def look_for_devices_updates(self, devices_list: list) -> int:
-        """
-        Verifica mudanças no estado dos dispositivos (conexão ou novos)
-        """
-        devices_to_update = 0
-
-        for device in devices_list:
-            device_name = device['device_name']
-            is_connected = device['connected']
-
-            # Mudança no estado de conexão
-            if device_name in self.devices_state:
-                device_state = self.devices_state[device_name['connected']]
-
-                if is_connected != device_state:
-                    devices_to_update += 1
-            else:
-                # Novo dispositivo
-                devices_to_update += 1
-
-        return devices_to_update
+    def format_device_label(self, name, battery):
+        return f"{name}: {battery}%" if battery else name
 
     def update_devices_menu(self) -> None:
-        """
-        Atualiza o menu de dispositivos, se necessário
-        """
         devices_list = get_battery_level()
+        devices_list.sort(key=lambda d: d['device_name'].lower())
 
-        if self.look_for_devices_updates(devices_list) > 0:
-            self.clear_menu()
+        current_device_names = {
+            device['device_name'] for device in devices_list
+        }
+        known_device_names = set(self.menu_items.keys())
 
-            for device in devices_list:
-                device_name = device['device_name']
-                battery_life = device['battery_life']
-                is_connected = device['connected']
+        first_connected_device = None
 
-                if battery_life:
-                    label = f'{device_name}: {battery_life}%'
-                else:
-                    label = device_name
+        for device in devices_list:
+            name = device['device_name']
+            connected = device['connected']
+            battery = device['battery_life']
+            icon = device['icon']
+            label = self.format_device_label(name, battery)
 
-                device_item = Gtk.MenuItem(label=label)
-                device_item.set_sensitive(is_connected)
+            if connected and not first_connected_device:
+                first_connected_device = device
 
-                self.menu.prepend(device_item)
+            if name in self.menu_items:
+                menu_item = self.menu_items[name]
 
-                # Atualiza estado
-                self.devices_state[device_name] = {
-                    'connected': is_connected
-                }
+                if menu_item.get_label() != label:
+                    menu_item.set_label(label)
 
-            self.menu.show_all()
+                menu_item.set_sensitive(connected)
+
+            else:
+                menu_item = Gtk.MenuItem(label=label)
+                menu_item.device_name = name
+
+                menu_item.connect('activate', self.get_icon)
+                menu_item.set_sensitive(connected)
+
+                self.menu.append(menu_item)
+                self.menu_items[name] = menu_item
+
+                menu_item.show()
+
+            print(self.menu_items)
+            self.devices_state[name] = {
+                'connected': connected,
+                'icon': icon,
+                'battery': battery
+            }
+
+        # Adiciona o botão de sair
+        self.menu.append(Gtk.SeparatorMenuItem())
+        self.menu.append(self.quit_item)
+
+        removed_devices = known_device_names - current_device_names
+        for name in removed_devices:
+            item = self.menu_items.pop(name)
+            self.menu.remove(item)
+            self.devices_state.pop(name, None)
+
+        if first_connected_device:
+            self.indicator.set_icon(first_connected_device['icon'])
+            self.indicator.set_label(
+                f"{first_connected_device['battery_life']}%", ''
+            )
+
+        self.menu.show_all()
 
     def update_battery_loop(self) -> None:
-        """
-        Loop que atualiza o menu a cada 5 segundos
-        """
         try:
             while self.running:
                 if self.running:
@@ -121,10 +120,21 @@ class BatteryIndicator:
             logging.exception('Erro ao encontrar dispositivos')
             self.quit()
 
+    def get_icon(self, item) -> None:
+        device = getattr(item, 'device_name', None)
+
+        if device and device in self.devices_state:
+            icon = self.devices_state[device]['icon']
+            battery = self.devices_state[device]['battery']
+            self.indicator.set_icon(icon)
+            self.indicator.set_label(f'{battery}%', '')
+
+        else:
+            logging.warning(
+                'Dispositivo não encontrado ao tentar definir o ícone.'
+            )
+
     def quit(self, _) -> None:
-        """
-        Encerra a aplicação de forma limpa
-        """
         self.running = False
         self.update_thread.join()
         Gtk.main_quit()
