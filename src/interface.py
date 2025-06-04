@@ -71,6 +71,7 @@ class BatteryIndicator:
             if connected and not first_connected_device:
                 first_connected_device = device
 
+            # Verifica se o dispositivo já está no menu
             if name in self.menu_items:
                 menu_item = self.menu_items[name]
 
@@ -79,6 +80,7 @@ class BatteryIndicator:
 
                 menu_item.set_sensitive(connected)
 
+            # Se o dispositivo não estiver no menu, cria um novo item
             else:
                 menu_item = Gtk.MenuItem(label=label)
                 menu_item.device_name = name
@@ -91,6 +93,7 @@ class BatteryIndicator:
 
                 menu_item.show()
 
+            # Atualiza o estado do dispositivo
             self.devices_state[name] = {
                 'connected': connected,
                 'icon': icon,
@@ -128,6 +131,11 @@ class BatteryIndicator:
             self.quit()
 
     def get_icon(self, item) -> None:
+        """
+        Obtém o ícone do dispositivo selecionado e atualiza o indicador
+
+        :params item: O item do menu que foi ativado
+        """
         device = getattr(item, 'device_name', None)
 
         if device and device in self.devices_state:
