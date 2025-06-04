@@ -91,16 +91,16 @@ class BatteryIndicator:
 
                 menu_item.show()
 
-            print(self.menu_items)
             self.devices_state[name] = {
                 'connected': connected,
                 'icon': icon,
                 'battery': battery
             }
 
-        # Adiciona o botão de sair
-        self.menu.append(Gtk.SeparatorMenuItem())
-        self.menu.append(self.quit_item)
+        # Adiciona o botão de sair caso ainda não esteja no menu
+        if self.quit_item not in self.menu:
+            self.menu.append(Gtk.SeparatorMenuItem())
+            self.menu.append(self.quit_item)
 
         removed_devices = known_device_names - current_device_names
         for name in removed_devices:
